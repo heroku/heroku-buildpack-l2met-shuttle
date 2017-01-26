@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# bin/compile <BUILD_DIR> <CACHE_DIR> <ENV_DIR>
+
+set -eu -o pipefail
+
+BUILDPACK_DIR="$(dirname "$(dirname "$0")")"
+BUILD_DIR=$(cd "$1/" && pwd)
+
+echo "-----> Installing the l2met-shuttle executable"
+mkdir -p "$BUILD_DIR/.heroku/l2met-shuttle/bin"
+cp "$BUILDPACK_DIR/support/l2met-shuttle" "$BUILD_DIR/.heroku/l2met-shuttle/bin/"
+
+echo "-----> Moving the start-l2met-shuttle script into bin/"
+mkdir -p "$BUILD_DIR/bin"
+cp "$BUILDPACK_DIR/support/start-l2met-shuttle" "$BUILD_DIR/bin/"
