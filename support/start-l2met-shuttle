@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# bin/start-l2met-shuttle <command> [<argument>...]
+
+set -eu -o pipefail
+
+main() {
+  if ! is-enabled "${L2MET_SHUTTLE_ENABLE:-1}"; then
+    exec "$@"
+  fi
+
+  run-l2met-shuttle "$@"
+}
+
+run-l2met-shuttle() {
+  declare pipe
+  pipe=$(mktemp -u)
+  mkfifo --mode=600 "$pipe"
+
+  (<"$pipe" .heroku/l2met-shuttle/bin/l2met-shuttle "${L2MET_SHUTTLE_URL:?}") &
+
+  exec "$@" > >(tee "$pipe") 2> >(tee "$pipe" >&2)
+}
+
+is-enabled() {
+  (
+    shopt -s extglob nocasematch
+    [[ $1 == @(1|true|yes|on) ]]
+  )
+}
+
+[[ "$0" != "${BASH_SOURCE[0]}" ]] || main "$@"
