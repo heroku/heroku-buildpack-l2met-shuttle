@@ -18,7 +18,7 @@ run-l2met-shuttle() {
 
   (<"$pipe" .heroku/l2met-shuttle/bin/l2met-shuttle "${L2MET_SHUTTLE_URL:?}") &
 
-  exec "$@" > >(tee "$pipe") 2> >(tee "$pipe" >&2)
+  "$@" > >(tee "$pipe") 2> >(tee "$pipe" >&2)
 }
 
 is-enabled() {
