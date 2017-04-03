@@ -17,8 +17,9 @@ run-l2met-shuttle() {
   mkfifo --mode=600 "$pipe"
 
   (<"$pipe" .heroku/l2met-shuttle/bin/l2met-shuttle "${L2MET_SHUTTLE_URL:?}") &
+  exec > >(exec tee "$pipe") 2> >(exec tee "$pipe" >&2)
 
-  "$@" > >(tee "$pipe") 2> >(tee "$pipe" >&2)
+  "$@" 
 }
 
 is-enabled() {
