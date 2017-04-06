@@ -12,14 +12,11 @@ main() {
 }
 
 run-l2met-shuttle() {
-  declare pipe
-  pipe=$(mktemp -u)
-  mkfifo --mode=600 "$pipe"
+  exec \
+    1> >(exec .heroku/l2met-shuttle/bin/l2met-shuttle --tee "${L2MET_SHUTTLE_URL:?}") \
+    2> >(exec .heroku/l2met-shuttle/bin/l2met-shuttle --tee "${L2MET_SHUTTLE_URL:?}" >&2)
 
-  (<"$pipe" .heroku/l2met-shuttle/bin/l2met-shuttle "${L2MET_SHUTTLE_URL:?}") &
-  exec > >(exec tee "$pipe") 2> >(exec tee "$pipe" >&2)
-
-  "$@" 
+  exec "$@" 
 }
 
 is-enabled() {
