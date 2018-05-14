@@ -18,7 +18,7 @@ You also need to define the URL of your [L2met][l2met] compatible endpoint:
 Next, for each process that emit metrics, you will need to preface the command in your Procfile with `start-l2met-shuttle`. In this example, we want only the web process to send metrics through `l2met-shuttle`.
 
     $ cat Procfile
-    web:    start-l2met-shuttle bundle exec unicorn -p $PORT -c ./config/unicorn.rb -E $RACK_ENV
+    web:    ./bin/start-l2met-shuttle bundle exec unicorn -p $PORT -c ./config/unicorn.rb -E $RACK_ENV
     worker: bundle exec rake worker
 
 Rebuild your app for the changes to take effect.
