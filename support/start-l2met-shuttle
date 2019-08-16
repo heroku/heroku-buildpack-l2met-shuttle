@@ -3,6 +3,12 @@
 
 set -eu -o pipefail
 
+_term() {
+    echo "start-l2met-shuttle: received TERM, ignoring"
+}
+
+trap _term SIGTERM
+
 main() {
   if ! is-enabled "${L2MET_SHUTTLE_ENABLE:-1}"; then
     exec "$@"
@@ -12,13 +18,7 @@ main() {
 }
 
 run-l2met-shuttle() {
-  declare pipe
-  pipe=$(mktemp -u)
-  mkfifo --mode=600 "$pipe"
-
-  (<"$pipe" .heroku/l2met-shuttle/bin/l2met-shuttle "${L2MET_SHUTTLE_URL:?}") &
-
-  exec "$@" > >(tee "$pipe") 2> >(tee "$pipe" >&2)
+  exec "$@" 2>&1 | .heroku/l2met-shuttle/bin/l2met-shuttle -tee "${L2MET_SHUTTLE_URL:?}"
 }
 
 is-enabled() {
