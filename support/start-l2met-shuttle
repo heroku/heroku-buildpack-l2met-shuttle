@@ -18,6 +18,15 @@ main() {
 }
 
 run-l2met-shuttle() {
+  # run the provided command ("$@") using l2met-shuttle's
+  # `-tee` mode instead of using a fifo like the previous mechanism.
+  # The old mechanism (see git for the diff) used the `tee` program,
+  # and a named fifo (pipe) instead of using a normal pipe.
+  # This is because it was implemented before `l2met-shuttle` had the `-tee`
+  # option, and so we needed to copy stdout/stderr to this script's stdout/stderr
+  # explicitly.
+  # `-tee` fixes all of that, and means we can just use a normal pipe (once we redirect
+  # stderr to stdout anyway).
   exec "$@" 2>&1 | .heroku/l2met-shuttle/bin/l2met-shuttle -tee "${L2MET_SHUTTLE_URL:?}"
 }
 
