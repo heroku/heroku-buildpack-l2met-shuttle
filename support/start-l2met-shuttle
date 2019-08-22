@@ -4,6 +4,9 @@
 set -eu -o pipefail
 
 _term() {
+    # we trap SIGTERM so that we can use `exec` on the
+    # command passed in, yet still not die when given
+    # SIGTERM
     echo "start-l2met-shuttle: received TERM, ignoring"
 }
 
