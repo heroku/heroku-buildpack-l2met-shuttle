@@ -3,6 +3,15 @@
 
 set -eu -o pipefail
 
+_term() {
+    # we trap SIGTERM so that we can use `exec` on the
+    # command passed in, yet still not die when given
+    # SIGTERM
+    echo "start-l2met-shuttle: received TERM, ignoring"
+}
+
+trap _term SIGTERM
+
 main() {
   if ! is-enabled "${L2MET_SHUTTLE_ENABLE:-1}"; then
     exec "$@"
@@ -12,13 +21,18 @@ main() {
 }
 
 run-l2met-shuttle() {
-  declare pipe
-  pipe=$(mktemp -u)
-  mkfifo --mode=600 "$pipe"
-
-  (<"$pipe" .heroku/l2met-shuttle/bin/l2met-shuttle "${L2MET_SHUTTLE_URL:?}") &
-
-  exec "$@" > >(tee "$pipe") 2> >(tee "$pipe" >&2)
+  # run the provided command ("$@") using l2met-shuttle's
+  # `-tee` mode instead of using a fifo like the previous mechanism.
+  # The old mechanism (see git for the diff) used the `tee` program,
+  # and a named fifo (pipe) instead of using a normal pipe.
+  # This is because it was implemented before `l2met-shuttle` had the `-tee`
+  # option, and so we needed to copy stdout/stderr to this script's stdout/stderr
+  # explicitly.
+  # running `tee` itself was a problem for the SIGTERM handling, because `tee` itself
+  # just exits the moment it receives a TERM
+  # `-tee` fixes all of that, and means we can just use a normal pipe (once we redirect
+  # stderr to stdout anyway).
+  exec "$@" 2>&1 | .heroku/l2met-shuttle/bin/l2met-shuttle -tee "${L2MET_SHUTTLE_URL:?}"
 }
 
 is-enabled() {
