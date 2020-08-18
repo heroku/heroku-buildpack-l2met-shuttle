@@ -9,7 +9,7 @@ This is a [Heroku buildpack][buildpack] that allows an app to use [l2met-shuttle
 
 First you need to set this buildpack as your initial buildpack with:
 
-    $ heroku buildpacks:add -i 1 https://github.com/heroku/heroku-buildpack-l2met-shuttle.git
+    $ heroku buildpacks:add -i 1 heroku-community/l2met-shuttle
 
 You also need to define the URL of your [L2met][l2met] compatible endpoint:
 
